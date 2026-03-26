@@ -11,7 +11,9 @@ qiskit==0.44.0
 qiskit-machine-learning==0.7.2
 qiskit-aer==0.13.0
 pennylane==0.38.0
+autoray>=0.6.11,<0.7.0      # ← ADD THIS (prevents NumpyMimic error)
 pennylane-lightning>=0.30.0
+autograd>=1.5               # ← ADD THIS (for VQR autograd interface)
 
 # Visualization
 matplotlib>=3.5.0,<4.0.0
