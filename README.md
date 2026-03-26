@@ -370,19 +370,4 @@ watch -n 60 'du -sh results/'
 4. ✅ Compare with manuscript results
 5. ✅ Explore notebooks in `notebooks/` for interactive analysis
 
-## 🤝 Getting Help
 
-- **Issues:** Open an issue on GitHub
-- **Questions:** Contact [your-email@university.edu]
-- **Documentation:** See `docs/` directory
-
-## 📖 Additional Resources
-
-- Full documentation: `docs/USAGE.md`
-- API reference: `docs/API.md`
-- Tutorial notebooks: `notebooks/`
-- Paper: [DOI link]
-
----
-
-**Happy experimenting! 🎉**
