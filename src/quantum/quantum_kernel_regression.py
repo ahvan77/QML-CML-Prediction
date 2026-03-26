@@ -11,7 +11,7 @@ Configuration (Optimized):
 - Training sizes: 200, 400, 600 samples per class
 - Classes: Carbohydrate, Lignin, Lipid, Protein, Others
 
-Author: [Your Name]
+Author: Sadollah Ebrahimi
 Date: March 2026
 """
 
@@ -166,9 +166,11 @@ def run_quantum_kernel_regression(
             y_train_norm = (y_train - y_mean) / y_std
             
             # Create quantum feature map and kernel
+           # n_qubits = len(FEATURE_COLS) 
             feature_map = ZZFeatureMap(
-                feature_dimension=len(FEATURE_COLS),
-                reps=REPS
+               feature_dimension=5,
+               reps=REPS,           # or your existing args
+               entanglement="full"  # etc., same signature as before
             )
             quantum_kernel = FidelityQuantumKernel(feature_map=feature_map)
             
