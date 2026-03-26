@@ -11,7 +11,7 @@ Configuration (Optimized):
 - Optimizer: Class-specific (from Table S5)
 - Output: ⟨Z₀⟩ expectation value
 
-Author: [Your Name]
+Author: Sadollah Ebrahimi
 Date: March 2026
 """
 
