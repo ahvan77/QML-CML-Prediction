@@ -15,7 +15,7 @@ Complete setup and usage guide for reproducing the manuscript results.
 
 ```bash
 git clone https://github.com/YOUR_USERNAME/QML-CML-Prediction.git
-cd qml-ccs-prediction
+cd QML-CML-Prediction
 ```
 
 ### Step 2: Create Virtual Environment
