@@ -114,10 +114,10 @@ print(f'✅ Data format correct ({len(df)} samples)')
 
 ```bash
 # Make script executable
-chmod +x run_all_experiments.sh
+chmod +x run_all.sh
 
 # Run everything
-bash run_all_experiments.sh
+bash run_all.sh
 ```
 
 **Expected runtime:** 2-4 hours (depending on hardware)
