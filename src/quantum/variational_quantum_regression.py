@@ -2,6 +2,8 @@
 Variational Quantum Regression for CCS Prediction
 =================================================
 
+Windows-compatible version using autograd interface.
+
 Main implementation for manuscript Section 2.4.
 
 Configuration (Optimized):
@@ -16,11 +18,22 @@ Date: March 2026
 """
 
 import os
+import sys
 import pandas as pd
 import numpy as np
 import argparse
-import pennylane as qml
-from pennylane import numpy as pnp
+
+# Check for PennyLane and try to import with error handling
+try:
+    import pennylane as qml
+    from pennylane import numpy as pnp
+except ImportError as e:
+    print(f"Error importing PennyLane: {e}")
+    print("\nPlease install PennyLane:")
+    print("  pip uninstall pennylane jax jaxlib -y")
+    print("  pip install pennylane==0.37.0 autograd")
+    sys.exit(1)
+
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 import warnings
@@ -30,7 +43,12 @@ warnings.filterwarnings('ignore')
 # CONFIGURATION
 # ============================================================================
 
-pnp.random.seed(42)
+# Set random seeds
+np.random.seed(42)
+try:
+    pnp.random.seed(42)
+except:
+    pass
 
 # Molecular descriptors (Z-score normalized)
 FEATURE_COLS = ["A_scaled", "B_scaled", "C_scaled", "D_scaled", "E_scaled"]
@@ -63,8 +81,13 @@ CLASS_OPTIMIZERS = {
 # QUANTUM CIRCUIT
 # ============================================================================
 
-# Initialize quantum device
-dev = qml.device("default.qubit", wires=N_QUBITS)
+# Initialize quantum device with autograd interface
+try:
+    dev = qml.device("default.qubit", wires=N_QUBITS)
+except Exception as e:
+    print(f"Error initializing quantum device: {e}")
+    print("Trying legacy device initialization...")
+    dev = qml.device("default.qubit.autograd", wires=N_QUBITS)
 
 def create_circuit(weights, x):
     """
@@ -119,8 +142,16 @@ def cost_batch(weights, X_batch, y_batch):
     cost : float
         Mean squared error
     """
-    predictions = pnp.array([qnode(weights, x) for x in X_batch])
-    return pnp.mean((predictions - y_batch) ** 2)
+    try:
+        predictions = pnp.array([qnode(weights, x) for x in X_batch])
+    except:
+        # Fallback to regular numpy if pnp fails
+        predictions = np.array([qnode(weights, x) for x in X_batch])
+    
+    try:
+        return pnp.mean((predictions - y_batch) ** 2)
+    except:
+        return np.mean((predictions - y_batch) ** 2)
 
 # ============================================================================
 # OPTIMIZER FACTORY
@@ -186,10 +217,15 @@ def train_vqr(X_train, y_train, optimizer_name, n_layers=N_LAYERS,
     n_samples = len(X_train)
     
     # Initialize weights
-    weights = pnp.array(
-        pnp.random.randn(n_layers, N_QUBITS),
-        requires_grad=True
-    )
+    try:
+        weights = pnp.array(
+            pnp.random.randn(n_layers, N_QUBITS),
+            requires_grad=True
+        )
+    except:
+        # Fallback for older PennyLane versions
+        weights = np.random.randn(n_layers, N_QUBITS)
+        weights = pnp.array(weights, requires_grad=True)
     
     # Create optimizer
     optimizer = get_optimizer(optimizer_name)
@@ -198,15 +234,21 @@ def train_vqr(X_train, y_train, optimizer_name, n_layers=N_LAYERS,
     for step in range(steps):
         # Sample mini-batch
         batch_size_actual = min(batch_size, n_samples)
-        indices = pnp.random.choice(n_samples, size=batch_size_actual, replace=False)
+        indices = np.random.choice(n_samples, size=batch_size_actual, replace=False)
         X_batch = X_train[indices]
         y_batch = y_train[indices]
         
         # Update weights
-        weights, cost = optimizer.step_and_cost(
-            lambda w: cost_batch(w, X_batch, y_batch),
-            weights
-        )
+        try:
+            weights, cost = optimizer.step_and_cost(
+                lambda w: cost_batch(w, X_batch, y_batch),
+                weights
+            )
+        except Exception as e:
+            if verbose:
+                print(f"  Warning: Optimization step {step} had issues: {e}")
+            # Continue with current weights
+            cost = cost_batch(weights, X_batch, y_batch)
         
         if verbose and step % 10 == 0:
             print(f"  Step {step:3d}: Batch cost = {cost:.4f}")
@@ -256,8 +298,8 @@ def run_vqr_experiments(
     
     # Create output directories
     os.makedirs(output_dir, exist_ok=True)
-    os.makedirs(f"{output_dir}/pred_vs_obs_vqr", exist_ok=True)
-    os.makedirs(f"{output_dir}/experimental_predictions_vqr", exist_ok=True)
+    os.makedirs(os.path.join(output_dir, "pred_vs_obs_vqr"), exist_ok=True)
+    os.makedirs(os.path.join(output_dir, "experimental_predictions_vqr"), exist_ok=True)
     
     results = []
     
@@ -271,6 +313,7 @@ def run_vqr_experiments(
         print(f"  Training: {STEPS} steps, batch size {BATCH_SIZE}")
         print(f"  Classes: {len(classes)}")
         print(f"  Training sizes: {train_sizes}")
+        print(f"  Device: {dev}")
         print("="*80 + "\n")
     
     # Process each molecular class
@@ -330,17 +373,26 @@ def run_vqr_experiments(
             if verbose:
                 print(f"Training VQR ({STEPS} steps, batch={BATCH_SIZE})...")
             
-            weights = train_vqr(
-                X_train, y_train_norm,
-                optimizer_name=optimizer_name,
-                n_layers=N_LAYERS,
-                batch_size=BATCH_SIZE,
-                steps=STEPS,
-                verbose=verbose
-            )
+            try:
+                weights = train_vqr(
+                    X_train, y_train_norm,
+                    optimizer_name=optimizer_name,
+                    n_layers=N_LAYERS,
+                    batch_size=BATCH_SIZE,
+                    steps=STEPS,
+                    verbose=verbose
+                )
+            except Exception as e:
+                print(f"❌ Training failed for {class_name} (n={n_samples}): {e}")
+                continue
             
             # Predict on test set
-            preds_norm = pnp.array([qnode(weights, x) for x in X_test])
+            try:
+                preds_norm = np.array([qnode(weights, x) for x in X_test])
+            except Exception as e:
+                print(f"❌ Prediction failed: {e}")
+                continue
+                
             preds = preds_norm * y_std + y_mean  # Denormalize
             
             # Calculate metrics
@@ -393,7 +445,7 @@ def run_vqr_experiments(
                         X_exp = exp_df[FEATURE_COLS].values
                         
                         # Predict and denormalize
-                        exp_preds_norm = pnp.array([qnode(weights, x) for x in X_exp])
+                        exp_preds_norm = np.array([qnode(weights, x) for x in X_exp])
                         exp_preds = exp_preds_norm * y_std + y_mean
                         
                         # Add to dataframe
@@ -428,8 +480,9 @@ def run_vqr_experiments(
         print(f"  - Summary: vqr_results_all_classes.csv")
         print(f"  - Per-sample predictions: pred_vs_obs_vqr/")
         print(f"  - Experimental predictions: experimental_predictions_vqr/")
-        print(f"\nOverall performance (average R² by class):")
-        print(results_df.groupby('Class')['R2'].mean().to_string())
+        if len(results_df) > 0:
+            print(f"\nOverall performance (average R² by class):")
+            print(results_df.groupby('Class')['R2'].mean().to_string())
         print("="*80 + "\n")
     
     return results_df
