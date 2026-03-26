@@ -1,429 +1,254 @@
-# Usage Guide
+# Quick Start Guide
 
-This guide provides detailed instructions for running the experiments and reproducing the results from our paper.
+Complete setup and usage guide for reproducing the manuscript results.
 
-## Table of Contents
+## 📋 Prerequisites
 
-1. [Dataset Preparation](#dataset-preparation)
-2. [Running Individual Models](#running-individual-models)
-3. [Generating Figures](#generating-figures)
-4. [Reproducing Paper Results](#reproducing-paper-results)
-5. [Custom Experiments](#custom-experiments)
+- Python 3.8 or higher
+- 16+ GB RAM (for quantum kernel with n=600)
+- ~50 GB free disk space
+- Linux, macOS, or Windows
 
----
+## 🚀 Installation
 
-## Dataset Preparation
+### Step 1: Clone Repository
 
-### Dataset Structure
+```bash
+git clone https://github.com/YOUR_USERNAME/qml-ccs-prediction.git
+cd qml-ccs-prediction
+```
 
-The dataset should be organized as follows:
+### Step 2: Create Virtual Environment
+
+**Option A: Using venv (recommended)**
+
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
+
+**Option B: Using conda**
+
+```bash
+conda env create -f environment.yml
+conda activate qml-ccs
+```
+
+### Step 3: Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+**Verify installation:**
+
+```bash
+python -c "import qiskit; import pennylane; import sklearn; print('✅ All packages installed')"
+```
+
+## 📁 Data Preparation
+
+### Step 1: Organize Your Data
+
+Your data should be organized as follows:
 
 ```
-data/
+Data/
 ├── features/
 │   ├── Carbohydrate/
-│   │   ├── train.csv  # 5 features + CCS target
+│   │   ├── train.csv
 │   │   └── test.csv
 │   ├── Lignin/
+│   │   ├── train.csv
+│   │   └── test.csv
 │   ├── Lipid/
+│   │   ├── train.csv
+│   │   └── test.csv
 │   ├── Protein/
+│   │   ├── train.csv
+│   │   └── test.csv
 │   └── Others/
-└── experimental/
+│       ├── train.csv
+│       └── test.csv
+└── experimental/  # Optional
     ├── Carbohydrate_experimental.csv
+    ├── Lignin_experimental.csv
     └── ...
 ```
 
-### Required Columns
+### Step 2: Data Format
 
-**Training/Test Files:**
-- `A_scaled`, `B_scaled`, `C_scaled`, `D_scaled`, `E_scaled` (features)
-- `CCS` (target variable, Ų)
+Each CSV file must contain:
 
-**Experimental Files:**
-- Same 5 scaled features
-- `CCS` column optional (for validation)
+**Required columns:**
+- `A_scaled` - m/z (Z-score normalized)
+- `B_scaled` - DBE (Z-score normalized)
+- `C_scaled` - AImod (Z-score normalized)
+- `D_scaled` - H/C ratio (Z-score normalized)
+- `E_scaled` - O/C ratio (Z-score normalized)
+- `CCS` - Collision cross-section (Ų)
 
-### Data Format Example
+**Example:**
 
 ```csv
 A_scaled,B_scaled,C_scaled,D_scaled,E_scaled,CCS
 0.234,-0.456,1.234,-0.789,0.567,245.3
 -0.123,0.678,-0.345,0.234,-0.890,312.7
-...
 ```
 
----
-
-## Running Individual Models
-
-### 1. Quantum Kernel Regression
-
-#### Basic Usage
-
-```python
-from src.quantum.quantum_kernel import run_quantum_kernel_experiments
-
-# Run for all classes with default settings
-results = run_quantum_kernel_experiments(
-    data_dir="Data/features",
-    train_sizes=[200, 400, 600],
-    classes=["Carbohydrate", "Lignin", "Lipid", "Protein", "Others"]
-)
-```
-
-#### Advanced Configuration
-
-```python
-# Custom configuration
-results = run_quantum_kernel_experiments(
-    data_dir="Data/features",
-    train_sizes=[600],  # Only largest size
-    classes=["Carbohydrate"],  # Single class
-    reps=1,  # ZZFeatureMap repetitions (optimized)
-    alpha=0.03,  # Regularization parameter
-    output_dir="results/custom_qkr"
-)
-```
-
-#### Command Line
+**Verify your data:**
 
 ```bash
-# Run with default settings
-python src/quantum/quantum_kernel.py
-
-# Custom parameters
-python src/quantum/quantum_kernel.py \
-    --data-dir Data/features \
-    --train-sizes 200 400 600 \
-    --classes Carbohydrate Lipid \
-    --reps 1 \
-    --output-dir results/qkr_custom
+python -c "
+import pandas as pd
+df = pd.read_csv('Data/features/Carbohydrate/train.csv')
+required_cols = ['A_scaled', 'B_scaled', 'C_scaled', 'D_scaled', 'E_scaled', 'CCS']
+assert all(col in df.columns for col in required_cols), 'Missing required columns'
+print(f'✅ Data format correct ({len(df)} samples)')
+"
 ```
 
-#### Expected Output
+## 🏃 Running Experiments
 
-```
-✓ Carbohydrate (train size=600): MAE=12.34, RMSE=15.67, R2=0.945
-✓ Saved predictions to: pred_vs_obs_quantum/pred_vs_obs_quantumkernel_Carbohydrate_600.csv
-✓ Saved results to: quantum_kernel_results_all_classes.csv
-```
-
----
-
-### 2. Variational Quantum Regression
-
-#### Basic Usage
-
-```python
-from src.quantum.variational_quantum import run_vqr_experiments
-
-# Run VQR with optimized settings
-results = run_vqr_experiments(
-    data_dir="Data/features",
-    train_sizes=[200, 400, 600],
-    classes=["Carbohydrate", "Lignin", "Lipid", "Protein", "Others"],
-    n_layers=1,  # Optimized circuit depth
-    steps=30,    # Training steps
-    batch_size=32
-)
-```
-
-#### Custom Optimizer Per Class
-
-```python
-# Class-specific optimizers (as determined in paper)
-optimizer_config = {
-    "Carbohydrate": "momentum",
-    "Lignin": "rmsprop",
-    "Lipid": "adam",
-    "Protein": "adam",
-    "Others": "rmsprop_gd"
-}
-
-results = run_vqr_experiments(
-    data_dir="Data/features",
-    optimizer_config=optimizer_config
-)
-```
-
-#### Command Line
+### Complete Workflow (All Experiments)
 
 ```bash
-# Run with default (optimized) settings
-python src/quantum/variational_quantum.py
+# Make script executable
+chmod +x run_all_experiments.sh
 
-# Custom configuration
-python src/quantum/variational_quantum.py \
-    --n-layers 1 \
-    --steps 30 \
-    --batch-size 32 \
-    --learning-rate 0.1
+# Run everything
+bash run_all_experiments.sh
 ```
 
----
+**Expected runtime:** 2-4 hours (depending on hardware)
 
-### 3. Classical Machine Learning
+### Run Individual Components
 
-#### Basic Usage
-
-```python
-from src.classical.classical_ml import run_classical_experiments
-
-# Run all classical models
-results = run_classical_experiments(
-    data_dir="Data/features",
-    train_sizes=[200, 400, 600],
-    models=["RandomForest", "SVR", "Lasso", "VotingRegressor"]
-)
-```
-
-#### Single Model
-
-```python
-# Run only Random Forest
-results = run_classical_experiments(
-    data_dir="Data/features",
-    models=["RandomForest"],
-    train_sizes=[600]
-)
-```
-
-#### Command Line
+**1. Quantum Kernel Regression Only:**
 
 ```bash
-# All models
-python src/classical/classical_ml.py
-
-# Specific models
-python src/classical/classical_ml.py \
-    --models RandomForest Lasso \
-    --train-sizes 200 400 600
+python src/quantum/quantum_kernel_regression.py
 ```
 
----
+Expected runtime: ~30-60 minutes per class
 
-## Generating Figures
-
-### Main Manuscript Figures
-
-```python
-from src.visualization.unified_visualization import generate_all_figures_and_tables
-
-# Generate all main figures and tables
-generate_all_figures_and_tables()
-```
-
-**Output:**
-- `Figure_4_test_predictions_n600.png/pdf`
-- `Figure_5_experimental_predictions.png/pdf`
-- `Table_1_model_performance_summary.csv`
-- Supplementary figures and tables
-
-### Custom Visualizations
-
-```python
-from src.visualization.unified_visualization import create_figure_4_test_predictions
-
-# Generate specific figure
-create_figure_4_test_predictions(
-    train_size=600,
-    classes_subset=["Carbohydrate", "Lipid"]
-)
-```
-
-### Command Line
+**2. Variational Quantum Regression Only:**
 
 ```bash
-# Generate all figures
+python src/quantum/variational_quantum_regression.py
+```
+
+Expected runtime: ~20-45 minutes per class
+
+**3. Classical Baselines Only:**
+
+```bash
+python src/classical/classical_baselines.py
+```
+
+Expected runtime: ~5-10 minutes total
+
+**4. Generate Figures Only:**
+
+```bash
 python src/visualization/unified_visualization.py
-
-# Generate supplementary figures
 python src/visualization/advanced_comparison.py
-
-# Or use the comprehensive script
-bash scripts/generate_all_figures.sh
 ```
 
----
+Expected runtime: ~2-5 minutes
 
-## Reproducing Paper Results
+### Custom Configurations
 
-### Complete Workflow
-
-To reproduce all results from the paper:
+**Run specific classes only:**
 
 ```bash
-# 1. Run quantum kernel experiments
-bash scripts/run_quantum_kernel.sh
-
-# 2. Run VQR experiments
-bash scripts/run_vqr.sh
-
-# 3. Run classical baselines
-bash scripts/run_classical.sh
-
-# 4. Generate all figures and tables
-bash scripts/generate_all_figures.sh
+python src/quantum/quantum_kernel_regression.py \
+    --classes Carbohydrate Lipid
 ```
 
-**Total Expected Runtime:** ~2-4 hours (depending on hardware)
+**Run specific training sizes:**
 
-### Verify Results
+```bash
+python src/quantum/quantum_kernel_regression.py \
+    --train-sizes 600
+```
+
+**Combine options:**
+
+```bash
+python src/classical/classical_baselines.py \
+    --classes Carbohydrate \
+    --train-sizes 200 400 600 \
+    --models RandomForest Lasso
+```
+
+## 📊 Output Structure
+
+After running experiments, you'll have:
+
+```
+qml-ccs-prediction/
+├── results/
+│   ├── quantum_kernel_results_all_classes.csv
+│   ├── vqr_results_all_classes.csv
+│   ├── classical_ml_size_scaling_results.csv
+│   ├── pred_vs_obs_quantum/
+│   ├── pred_vs_obs_vqr/
+│   ├── pred_vs_obs/
+│   ├── experimental_predictions_quantum/
+│   ├── experimental_predictions_vqr/
+│   └── experimental_predictions/
+│
+├── figures/
+│   ├── main/
+│   │   ├── Figure_4_test_predictions_n600.pdf
+│   │   └── Figure_5_experimental_predictions.pdf
+│   └── supplementary/
+│       ├── Figure_S3_combined_quantum_vs_classical.pdf
+│       ├── Figure_S4_residual_plots_n600.pdf
+│       ├── Figure_S5_training_size_effect.pdf
+│       └── Figure_S6_experimental_distributions.pdf
+│
+└── tables/
+    ├── Table_1_model_performance_summary.csv
+    ├── Table_S4_comprehensive_prediction_metrics.csv
+    ├── Table_S5_experimental_prediction_statistics.csv
+    └── Table_S6_statistical_comparisons.csv
+```
+
+## 🔍 Verifying Results
+
+### Check Summary Statistics
 
 ```python
-# Load and compare your results with paper
 import pandas as pd
 
-# Your results
-your_qkr = pd.read_csv("results/quantum_kernel_results_all_classes.csv")
+# Load results
+qkr = pd.read_csv("results/quantum_kernel_results_all_classes.csv")
+vqr = pd.read_csv("results/vqr_results_all_classes.csv")
+classical = pd.read_csv("results/classical_ml_size_scaling_results.csv")
 
-# Paper results (included in repository)
-paper_qkr = pd.read_csv("paper_results/quantum_kernel_results.csv")
-
-# Compare
-comparison = your_qkr.merge(
-    paper_qkr,
-    on=["Class", "TrainSize"],
-    suffixes=("_yours", "_paper")
-)
-
-print("R² Comparison:")
-print(comparison[["Class", "TrainSize", "R2_yours", "R2_paper"]])
+# Average R² by model
+print("Average R² by model:")
+print(qkr.groupby('Model')['R2'].mean())
+print(vqr.groupby('Model')['R2'].mean())
+print(classical.groupby('Model')['R2'].mean())
 ```
 
----
+### Compare with Manuscript
 
-## Custom Experiments
+Expected results (approximate, n=600):
 
-### Testing New Quantum Feature Maps
+| Model | Carbohydrate R² | Lipid R² | Protein R² |
+|-------|-----------------|----------|------------|
+| **QuantumKernel** | 0.95 | 0.94 | 0.48 |
+| **VQR** | 0.45 | 0.19 | 0.06 |
+| **RandomForest** | 0.97 | 0.96 | 0.90 |
+| **Lasso** | 0.96 | 0.95 | 0.88 |
 
-```python
-from qiskit.circuit.library import PauliFeatureMap
-from src.quantum.quantum_kernel import QuantumKernelRegressor
+## 🐛 Troubleshooting
 
-# Create custom feature map
-custom_feature_map = PauliFeatureMap(
-    feature_dimension=5,
-    reps=2,
-    paulis=['Z', 'ZZ']
-)
-
-# Run experiments
-model = QuantumKernelRegressor(
-    feature_map=custom_feature_map,
-    alpha=0.1
-)
-
-model.fit(X_train, y_train)
-predictions = model.predict(X_test)
-```
-
-### Testing Different VQR Ansätze
-
-```python
-import pennylane as qml
-from src.quantum.variational_quantum import train_vqr
-
-# Custom ansatz
-def custom_ansatz(weights, x, n_qubits=5):
-    # Encoding
-    qml.AngleEmbedding(x, wires=range(n_qubits))
-    
-    # Your custom variational layers
-    for layer in range(weights.shape[0]):
-        for qubit in range(n_qubits):
-            qml.RY(weights[layer, qubit], wires=qubit)
-        # Custom entanglement pattern
-        for i in range(n_qubits-1):
-            qml.CZ(wires=[i, i+1])
-    
-    return qml.expval(qml.PauliZ(0))
-
-# Train with custom ansatz
-results = train_vqr(
-    X_train, y_train,
-    ansatz=custom_ansatz,
-    n_layers=3
-)
-```
-
-### Hyperparameter Tuning
-
-```python
-from sklearn.model_selection import GridSearchCV
-from src.quantum.quantum_kernel import QuantumKernelWrapper
-
-# Grid search for optimal alpha
-param_grid = {'alpha': [0.01, 0.03, 0.1, 0.3, 1.0]}
-
-qkr_model = QuantumKernelWrapper(reps=1)
-grid_search = GridSearchCV(
-    qkr_model,
-    param_grid,
-    cv=5,
-    scoring='r2'
-)
-
-grid_search.fit(X_train, y_train)
-print(f"Best alpha: {grid_search.best_params_['alpha']}")
-print(f"Best R²: {grid_search.best_score_:.3f}")
-```
-
----
-
-## Performance Tips
-
-### Memory Management
-
-For large datasets (n > 400):
-
-```python
-# Process classes sequentially to reduce memory usage
-for class_name in classes:
-    results = run_quantum_kernel_experiments(
-        classes=[class_name],
-        train_sizes=[600]
-    )
-    # Results saved automatically
-    del results  # Free memory
-```
-
-### Parallel Processing
-
-```python
-from joblib import Parallel, delayed
-
-# Run multiple classes in parallel
-results = Parallel(n_jobs=4)(
-    delayed(run_quantum_kernel_experiments)(
-        classes=[cls],
-        train_sizes=[600]
-    )
-    for cls in classes
-)
-```
-
-### GPU Acceleration (PennyLane)
-
-```python
-import pennylane as qml
-
-# Use GPU device for VQR
-dev = qml.device("lightning.gpu", wires=5)
-
-@qml.qnode(dev)
-def circuit(weights, x):
-    # ... your circuit ...
-    return qml.expval(qml.PauliZ(0))
-```
-
----
-
-## Troubleshooting
-
-### Common Issues
-
-**1. Memory Error with Quantum Kernel**
+### Issue 1: Memory Error (Quantum Kernel)
 
 ```
 MemoryError: Unable to allocate array
@@ -431,38 +256,133 @@ MemoryError: Unable to allocate array
 
 **Solution:** Reduce training size or process classes sequentially
 
-**2. Qiskit Version Conflicts**
+```bash
+# Run one class at a time
+python src/quantum/quantum_kernel_regression.py --classes Carbohydrate
+python src/quantum/quantum_kernel_regression.py --classes Lignin
+# etc.
+```
+
+### Issue 2: Import Error (Qiskit)
 
 ```
 ImportError: cannot import name 'FidelityQuantumKernel'
 ```
 
-**Solution:** Ensure correct Qiskit ML version:
+**Solution:** Ensure correct Qiskit ML version
+
 ```bash
-pip install qiskit-machine-learning==0.7.2
+pip install qiskit-machine-learning==0.7.2 --force-reinstall
 ```
 
-**3. PennyLane Gradient Issues**
+### Issue 3: PennyLane Device Error
 
 ```
-ValueError: gradient computation failed
+DeviceError: device does not exist
 ```
 
-**Solution:** Use finite-difference gradients:
-```python
-@qml.qnode(dev, diff_method="finite-diff")
-def circuit(weights, x):
-    # ...
+**Solution:** Reinstall PennyLane
+
+```bash
+pip install pennylane==0.38.0 --force-reinstall
 ```
+
+### Issue 4: Missing Data Files
+
+```
+Skipping Carbohydrate: Missing train or test file
+```
+
+**Solution:** Check data directory structure matches the required format
+
+```bash
+ls -R Data/features/Carbohydrate/
+# Should show: train.csv  test.csv
+```
+
+### Issue 5: Slow Performance
+
+**For Quantum Experiments:**
+- Use smaller training sizes first (200 samples)
+- Process one class at a time
+- Consider running overnight
+
+**For VQR:**
+- Reduce number of steps: `--steps 10`
+- Increase batch size: `--batch-size 64`
+
+## 💡 Tips & Best Practices
+
+### 1. Start Small
+
+Test with one class and small training size:
+
+```bash
+python src/quantum/quantum_kernel_regression.py \
+    --classes Carbohydrate \
+    --train-sizes 200
+```
+
+### 2. Monitor Progress
+
+Use verbose output (default) to track progress:
+
+```bash
+python src/quantum/quantum_kernel_regression.py
+# Shows: Computing kernel matrices...
+# Shows: ✓ Kernel matrices computed
+```
+
+### 3. Save Intermediate Results
+
+Results are automatically saved after each class/size combination. If a run fails, you won't lose completed work.
+
+### 4. Use Screen/Tmux for Long Runs
+
+```bash
+# Start screen session
+screen -S qml-experiments
+
+# Run experiments
+bash run_all_experiments.sh
+
+# Detach: Ctrl+A, then D
+# Reattach: screen -r qml-experiments
+```
+
+### 5. Check Disk Space
+
+Quantum kernel matrices can be large:
+
+```bash
+# Check available space
+df -h .
+
+# Monitor during execution
+watch -n 60 'du -sh results/'
+```
+
+## 📚 Next Steps
+
+1. ✅ Run complete workflow: `bash run_all_experiments.sh`
+2. ✅ Review results in `results/` directory
+3. ✅ Check figures in `figures/` directory
+4. ✅ Compare with manuscript results
+5. ✅ Explore notebooks in `notebooks/` for interactive analysis
+
+## 🤝 Getting Help
+
+- **Issues:** Open an issue on GitHub
+- **Questions:** Contact [your-email@university.edu]
+- **Documentation:** See `docs/` directory
+
+## 📖 Additional Resources
+
+- Full documentation: `docs/USAGE.md`
+- API reference: `docs/API.md`
+- Tutorial notebooks: `notebooks/`
+- Paper: [DOI link]
 
 ---
 
-## Next Steps
-
-- Explore [Tutorial Notebooks](../notebooks/) for interactive examples
-- See [Methods Documentation](METHODS.md) for algorithmic details
-- Check [Contributing Guidelines](../CONTRIBUTING.md) to add new features
-
----
-
-**Questions?** Open an [issue](https://github.com/yourusername/qml-ccs-prediction/issues) or contact the authors.
+**Happy experimenting! 🎉**
