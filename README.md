@@ -14,7 +14,7 @@ Complete setup and usage guide for reproducing the manuscript results.
 ### Step 1: Clone Repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/QML-CML-Prediction.git
+[git clone https://github.com/ahvan77/QML-CML-Prediction.git
 cd QML-CML-Prediction
 ```
 
