@@ -15,7 +15,7 @@ Configuration:
 - Classes: Carbohydrate, Lignin, Lipid, Protein, Others
 - Hyperparameters: Optimized via 5-fold cross-validation
 
-Author: [Your Name]
+Author: Sadollah Ebrahimi
 Date: March 2026
 """
 
