@@ -373,7 +373,7 @@ watch -n 60 'du -sh results/'
 ## 🤝 Getting Help
 
 - **Issues:** Open an issue on GitHub
-- **Questions:** Contact [your-email@university.edu]
+- **Questions:** Contact [sa.ebrahimi@gmail.com]
 - **Documentation:** See `docs/` directory
 
 ## 📖 Additional Resources
