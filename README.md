@@ -64,7 +64,7 @@ qml-ccs-prediction/
 │       ├── data_loader.py             # Data loading utilities
 │       └── metrics.py                 # Evaluation metrics
 │
-
+```
 
 # Quick Start Guide
 
