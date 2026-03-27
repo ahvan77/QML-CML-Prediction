@@ -1,3 +1,72 @@
+# Quantum vs. Classical Machine Learning for CCS Prediction
+
+
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![Qiskit](https://img.shields.io/badge/Qiskit-0.7.2-6133BD)](https://qiskit.org/)
+[![PennyLane](https://img.shields.io/badge/PennyLane-0.38.0-blue)](https://pennylane.ai/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+**Scaling Behavior of Quantum Kernel Regression for Chemical Data: Insights from Homogeneous Subsets and CCS Prediction**
+
+This repository contains the complete code, data, and analysis for our systematic comparison of **quantum machine learning (QML)** and **classical machine learning (CML)** methods for predicting collision cross-section (CCS) values of dissolved organic matter (DOM) molecules.
+
+---
+
+## 📄 Paper Information
+
+**Authors:** Sadollah Ebrahimi
+**Journal:** JASMS 
+**DOI:** 
+**Preprint:** 
+
+**Abstract:** We present the first comprehensive empirical comparison of quantum kernel regression (QKR) and variational quantum regressors (VQR) against classical machine learning techniques (Random Forest, SVR, Lasso, Voting Regressor) for collision cross-section prediction. Using aquatic dissolved organic matter datasets across five chemical classes, we systematically investigate QML performance, data efficiency, and scaling behavior.
+
+**Key Findings:**
+- Classical models (RF, Lasso) achieve R² ≥ 0.9 for most molecular classes
+- QKR approaches classical performance on homogeneous classes (Carbohydrates, Lipids) with n ≥ 400 samples
+- VQR consistently underperforms both QKR and classical baselines
+- QML shows pronounced data-size dependency compared to classical methods
+
+---
+
+## 🗂️ Repository Structure
+
+```
+qml-ccs-prediction/
+├── README.md                          # This file
+├── LICENSE                            # MIT License
+├── requirements.txt                   # Python dependencies
+├── run_all.sh                  # Python dependencies
+├── data/                              # Dataset files
+│   ├── features/                      # Train/test splits by chemical class
+│   │   ├── Carbohydrate/
+│   │   │   ├── train.csv
+│   │   │   └── test.csv
+│   │   ├── Lignin/
+│   │   ├── Lipid/
+│   │   ├── Protein/
+│   │   └── Others/
+│   ├── experimental/                  # Experimental validation samples
+│   │   ├── Carbohydrate_experimental.csv
+│   │   └── ...
+│   └── molecules.csv                  # Full dataset
+│
+├── src/                               # Source code
+│   ├── quantum/
+│   │   ├── quantum_kernel.py          # QKR implementation
+│   │   └── variational_quantum.py     # VQR implementation
+│   ├── classical/
+│   │   └── classical_ml.py            # Classical ML baselines
+│   ├── visualization/
+│   │   ├── unified_visualization.py   # Main figures generator
+│   │   └── advanced_comparison.py     # Supplementary figures
+│   └── utils/
+│       ├── data_loader.py             # Data loading utilities
+│       └── metrics.py                 # Evaluation metrics
+│
+
+---
+
 # Quick Start Guide
 
 Complete setup and usage guide for reproducing the manuscript results.
