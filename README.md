@@ -432,7 +432,7 @@ watch -n 60 'du -sh results/'
 
 ## 📚 Next Steps
 
-1. ✅ Run complete workflow: `bash run_all_experiments.sh`
+1. ✅ Run complete workflow: `bash run_all.sh`
 2. ✅ Review results in `results/` directory
 3. ✅ Check figures in `figures/` directory
 4. ✅ Compare with manuscript results
