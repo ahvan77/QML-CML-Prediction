@@ -32,7 +32,7 @@ This repository contains the complete code, data, and analysis for our systemati
 ## 🗂️ Repository Structure
 
 ```
-qml-ccs-prediction/
+QML-CML-Prediction/
 ├── README.md                          # This file
 ├── LICENSE                            # MIT License
 ├── requirements.txt                   # Python dependencies
