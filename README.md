@@ -65,7 +65,6 @@ qml-ccs-prediction/
 │       └── metrics.py                 # Evaluation metrics
 │
 
----
 
 # Quick Start Guide
 
