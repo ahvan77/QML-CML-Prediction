@@ -303,16 +303,6 @@ print(vqr.groupby('Model')['R2'].mean())
 print(classical.groupby('Model')['R2'].mean())
 ```
 
-### Compare with Manuscript
-
-Expected results (approximate, n=600):
-
-| Model | Carbohydrate R² | Lipid R² | Protein R² |
-|-------|-----------------|----------|------------|
-| **QuantumKernel** | 0.95 | 0.94 | 0.48 |
-| **VQR** | 0.45 | 0.19 | 0.06 |
-| **RandomForest** | 0.97 | 0.96 | 0.90 |
-| **Lasso** | 0.96 | 0.95 | 0.88 |
 
 ## 🐛 Troubleshooting
 
