@@ -24,7 +24,7 @@ This repository contains the complete code, data, and analysis for our systemati
 ## Contributors
 - **Sadollah Ebrahimi** - *Universite de Sherbrooke, Canada* - [sadollah.ebrahimi@usherbrooke.ca]
 
-**Key Findings:**
+## Key Findings:
 - Classical models (RF, Lasso) achieve R² ≥ 0.9 for most molecular classes
 - QKR approaches classical performance on homogeneous classes (Carbohydrates, Lipids) with n ≥ 400 samples
 - VQR consistently underperforms both QKR and classical baselines
