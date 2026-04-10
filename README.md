@@ -2,7 +2,7 @@
 
 ## Contributor
 - **Sadollah Ebrahimi** - *Universite de Sherbrooke, Canada* - [sadollah.ebrahimi@usherbrooke.ca]
--
+---
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![Qiskit](https://img.shields.io/badge/Qiskit-0.7.2-6133BD)](https://qiskit.org/)
 [![PennyLane](https://img.shields.io/badge/PennyLane-0.38.0-blue)](https://pennylane.ai/)
