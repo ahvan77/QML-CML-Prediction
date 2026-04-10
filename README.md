@@ -12,15 +12,17 @@ This repository contains the complete code, data, and analysis for our systemati
 
 ---
 
-## 📄 Paper Information
+<!--## 📄 Paper Information
 
 **Authors:** Sadollah Ebrahimi
-<!-- **Journal:** JASMS 
+ **Journal:** JASMS 
 **DOI:** 
 **Preprint:** 
 
 **Abstract:** We present the first comprehensive empirical comparison of quantum kernel regression (QKR) and variational quantum regressors (VQR) against classical machine learning techniques (Random Forest, SVR, Lasso, Voting Regressor) for collision cross-section prediction. Using aquatic dissolved organic matter datasets across five chemical classes, we systematically investigate QML performance, data efficiency, and scaling behavior.
 -->
+## Contributors
+- **Sadollah Ebrahimi** - *Universite de Sherbrooke, Canada* - [sadollah.ebrahimi@usherbrooke.ca]
 
 **Key Findings:**
 - Classical models (RF, Lasso) achieve R² ≥ 0.9 for most molecular classes
