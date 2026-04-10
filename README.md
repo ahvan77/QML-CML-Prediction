@@ -1,5 +1,5 @@
 # Quantum vs. Classical Machine Learning for CCS Prediction
-
+----
 ## Contributor
 - **Sadollah Ebrahimi** - *Universite de Sherbrooke, Canada* - [sadollah.ebrahimi@usherbrooke.ca]
 ---
